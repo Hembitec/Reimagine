@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReImagine Interiors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Favicon: SVG replica of the Sidebar Logo (Gray-900 rounded square with white 'R') -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23111827%22/><text x=%2250%22 y=%2255%22 font-family=%22Inter, sans-serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.1em%22 letter-spacing=%22-4%22>R</text></svg>" />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f9fafb;
+      }
+      /* Custom scrollbar for chat */
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+      
+      /* Animation Keyframes */
+      @keyframes scan {
+          0% { top: 0%; }
+          50% { top: 100%; }
+          100% { top: 0%; }
+      }
+      .animate-scan {
+          animation: scan 2s ease-in-out infinite;
+      }
+      
+      @keyframes slider-move {
+          0% { left: 40%; }
+          50% { left: 60%; }
+          100% { left: 40%; }
+      }
+      .animate-slider-move {
+          animation: slider-move 3s ease-in-out infinite;
+      }
+
+      .perspective-1000 {
+          perspective: 1000px;
+      }
+
+      /* New Animations for Hero Background */
+      @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+          100% { transform: translateY(0px); }
+      }
+      .animate-float {
+          animation: float 6s ease-in-out infinite;
+      }
+      .animate-float-delayed {
+          animation: float 6s ease-in-out 3s infinite;
+      }
+      
+      @keyframes grid-flow {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(40px); }
+      }
+      .animate-grid-flow {
+          animation: grid-flow 2s linear infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
