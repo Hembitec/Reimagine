@@ -13,6 +13,7 @@ import {
   browserLocalPersistence,
   User
 } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -27,6 +28,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
 // Enable persistence
@@ -36,11 +38,12 @@ setPersistence(auth, browserLocalPersistence).catch((error) => {
 
 export { 
   auth, 
+  storage,
   googleProvider, 
   signInWithPopup, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
-  firebaseSignOut,
+  firebaseSignOut, 
   sendPasswordResetEmail,
   onAuthStateChanged 
 };

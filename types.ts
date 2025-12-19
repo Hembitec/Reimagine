@@ -14,7 +14,7 @@ export interface GeneratedImage {
   timestamp: number;
 }
 
-export type AppMode = 'interior' | 'product';
+export type AppMode = 'interior' | 'product' | 'asset';
 export type AppView = 'workspace' | 'library';
 
 export interface SuggestedStyle {
@@ -31,11 +31,13 @@ export interface Project {
   createdAt: number;
   updatedAt: number;
   mode: AppMode;
-  originalImage: string | null;
+  originalImage: string | null; // The user's product, room, or logo
+  referenceImage?: string | null; // The competitor's "style" image (Optional)
   generatedImages: GeneratedImage[];
   chatMessages: ChatMessage[];
   suggestedStyles: SuggestedStyle[];
   imageCount: number;
+  userPrompt?: string; // The initial user description/vision
 }
 
 export enum DesignStyle {

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Library as LibraryIcon, Plus, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+
+import React, { useState } from 'react';
+import { Layout, Library as LibraryIcon, Plus, LogOut, PanelLeftClose, PanelLeftOpen, User as UserIcon, Settings, Package, PenTool } from 'lucide-react';
 import { AppMode, AppView } from '../types';
 import { firebaseSignOut, auth } from '../services/firebase';
 
@@ -11,30 +12,23 @@ interface SidebarProps {
   onReset: () => void;
   hasImage: boolean;
   userEmail?: string | null;
+  isMobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeMode, activeView, onModeChange, onViewChange, onReset, hasImage, userEmail }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-        const mobile = window.innerWidth < 1024;
-        setIsMobile(mobile);
-        // Automatically collapse on mobile, expand on desktop by default
-        if (mobile) {
-            setIsCollapsed(true);
-        } else {
-            setIsCollapsed(false);
-        }
-    };
-    
-    // Initial check
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+const Sidebar: React.FC<SidebarProps> = ({ 
+  activeMode, 
+  activeView, 
+  onModeChange, 
+  onViewChange, 
+  onReset, 
+  hasImage, 
+  userEmail,
+  isMobileOpen,
+  onMobileClose
+}) => {
+  // Desktop collapse state
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -44,56 +38,45 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMode, activeView, onModeChange,
     }
   };
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleDesktopSidebar = () => setIsDesktopCollapsed(!isDesktopCollapsed);
 
   return (
     <>
       {/* Mobile Backdrop Overlay */}
-      {isMobile && !isCollapsed && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsCollapsed(true)}
-          />
-      )}
+      <div 
+        className={`fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+            isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onMobileClose}
+      />
 
       {/* 
-         Outer Container (Flex Item Placeholder) 
-         On mobile, this stays w-20 to prevent layout shifts when the "Inner" sidebar expands as an overlay.
-         On desktop, it grows to w-72 to push the content.
+         Sidebar Container
       */}
-      <div className={`h-full flex-shrink-0 transition-all duration-300 ${isCollapsed ? 'w-20' : (isMobile ? 'w-20' : 'w-72')}`}>
-        
-        {/* Inner Container (Actual Sidebar) */}
-        <div className={`
-            bg-white border-r border-gray-200 flex flex-col h-full transition-all duration-300 z-40
-            ${isMobile && !isCollapsed ? 'fixed inset-y-0 left-0 w-72 shadow-2xl' : 'w-full'}
-        `}>
-          
-          {/* Toggle Button */}
-          <button 
-            onClick={toggleSidebar}
-            className="absolute -right-3 top-8 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm hover:shadow-md text-gray-400 hover:text-gray-600 flex z-50 transition-all"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-          </button>
-
+      <aside 
+        className={`
+            bg-white border-r border-gray-200 flex flex-col h-full z-50 transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]
+            fixed inset-y-0 left-0 lg:relative
+            ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0 lg:shadow-none'}
+            ${isDesktopCollapsed ? 'lg:w-20' : 'lg:w-72'}
+            w-72
+        `}
+      >
           {/* Logo Area */}
-          <div className={`h-20 flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start pl-0 lg:pl-6'} border-b border-gray-100/50 relative overflow-hidden`}>
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0 bg-gray-900 z-10`}>
+          <div className={`h-16 flex items-center ${isDesktopCollapsed ? 'lg:justify-center' : 'px-6'} border-b border-gray-200 transition-all`}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-900 text-white shadow-sm flex-shrink-0">
               <span className="font-bold text-lg tracking-tighter">R</span>
             </div>
-            <div className={`ml-3 transition-all duration-300 whitespace-nowrap ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+            <div className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
                 <h1 className="text-base font-bold text-gray-900 leading-none tracking-tight">ReImagine</h1>
-                <p className="text-[10px] text-gray-400 font-medium mt-0.5">AI Design Studio</p>
             </div>
           </div>
 
-          {/* Primary Action */}
-          <div className={`px-4 py-6 transition-all duration-300 ${isCollapsed ? 'px-2' : ''}`}>
+          {/* Primary Action (New Project) */}
+          <div className={`p-4 transition-all duration-300 ${isDesktopCollapsed ? 'lg:px-3' : ''}`}>
               <button
                 onClick={() => {
-                    if (isMobile && !isCollapsed) setIsCollapsed(true); // Close drawer on action
+                    onMobileClose(); // Close drawer on action
                     if (activeView === 'library') {
                         onViewChange('workspace');
                         onReset();
@@ -103,80 +86,93 @@ const Sidebar: React.FC<SidebarProps> = ({ activeMode, activeView, onModeChange,
                         }
                     }
                 }}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl transition-all shadow-sm border border-gray-200 relative overflow-hidden group ${
+                className={`w-full flex items-center justify-center gap-3 py-3 rounded-xl transition-all shadow-sm border relative overflow-hidden group ${
                     activeView === 'workspace' && !hasImage
-                    ? 'bg-gray-900 text-white border-transparent hover:bg-gray-800'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    ? 'bg-gray-900 text-white border-transparent hover:bg-gray-800 shadow-gray-900/10'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                 }`}
                 title="Start a new creative project"
               >
-                <Plus size={18} strokeWidth={2.5} />
-                <span className={`font-semibold text-sm whitespace-nowrap ${isCollapsed ? 'hidden' : 'block'}`}>New Project</span>
+                <Plus size={20} strokeWidth={2} />
+                <span className={`font-semibold text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
+                    New Project
+                </span>
               </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 space-y-1">
+          {/* Navigation Links */}
+          <nav className="flex-1 px-3 space-y-1 overflow-y-auto py-2">
             
             <button
                 onClick={() => {
                     onViewChange('workspace');
-                    if (isMobile && !isCollapsed) setIsCollapsed(true);
+                    onMobileClose();
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
                     activeView === 'workspace'
-                    ? 'bg-gray-100 text-gray-900 font-semibold' 
+                    ? 'bg-blue-50 text-blue-700 font-medium' 
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                } ${isCollapsed ? 'justify-center' : ''}`}
+                } ${isDesktopCollapsed ? 'lg:justify-center' : ''}`}
                 title="Go to Workspace"
             >
-                <Layout size={18} />
-                <span className={`text-sm whitespace-nowrap ${isCollapsed ? 'hidden' : 'block'}`}>Canvas</span>
+                <Layout size={20} strokeWidth={1.5} className={activeView === 'workspace' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'} />
+                <span className={`text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>Canvas</span>
             </button>
 
             <button
                 onClick={() => {
                     onViewChange('library');
-                    if (isMobile && !isCollapsed) setIsCollapsed(true);
+                    onMobileClose();
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
                     activeView === 'library'
-                    ? 'bg-gray-100 text-gray-900 font-semibold' 
+                    ? 'bg-blue-50 text-blue-700 font-medium' 
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                } ${isCollapsed ? 'justify-center' : ''}`}
+                } ${isDesktopCollapsed ? 'lg:justify-center' : ''}`}
                 title="View your saved projects library"
             >
-                <LibraryIcon size={18} />
-                <span className={`text-sm whitespace-nowrap ${isCollapsed ? 'hidden' : 'block'}`}>Library</span>
+                <LibraryIcon size={20} strokeWidth={1.5} className={activeView === 'library' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'} />
+                <span className={`text-sm whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>Library</span>
             </button>
 
           </nav>
 
-          {/* User Profile */}
-          <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+          {/* Footer Area */}
+          <div className="p-3 border-t border-gray-200 bg-white">
+            
+            {/* Desktop Collapse Toggle */}
+            <button
+                onClick={toggleDesktopSidebar}
+                className={`w-full hidden lg:flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors mb-2 ${isDesktopCollapsed ? 'justify-center' : ''}`}
+                title={isDesktopCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+                {isDesktopCollapsed ? <PanelLeftOpen size={18} strokeWidth={1.5} /> : <PanelLeftClose size={18} strokeWidth={1.5} />}
+                <span className={`text-xs font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>Collapse</span>
+            </button>
+
+            {/* User Profile */}
             {userEmail && (
-                <div className={`flex items-center gap-3 mb-3 ${isCollapsed ? 'justify-center' : ''}`} title={`Signed in as ${userEmail}`}>
-                    <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-xs border border-gray-300 flex-shrink-0">
+                <div className={`flex items-center gap-3 px-2 py-2 mb-2 rounded-lg bg-gray-50/50 border border-transparent ${isDesktopCollapsed ? 'lg:justify-center' : ''}`} title={`Signed in as ${userEmail}`}>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 text-white flex items-center justify-center font-bold text-xs border border-gray-200 shadow-sm flex-shrink-0">
                         {userEmail.charAt(0).toUpperCase()}
                     </div>
-                    <div className={`overflow-hidden ${isCollapsed ? 'hidden' : 'block'}`}>
-                        <p className="text-xs font-semibold text-gray-900 truncate w-36">{userEmail}</p>
-                        <p className="text-[10px] text-green-600 font-medium">Online</p>
+                    <div className={`overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0 lg:hidden' : 'w-auto opacity-100 block'}`}>
+                        <p className="text-xs font-semibold text-gray-900 truncate w-32">{userEmail.split('@')[0]}</p>
+                        <p className="text-xs text-gray-400 truncate w-32">{userEmail}</p>
                     </div>
                 </div>
             )}
 
             <button
                 onClick={handleSignOut}
-                className={`w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all text-gray-400 hover:text-red-600 hover:bg-red-50 group ${isCollapsed ? 'justify-center' : ''}`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-gray-500 hover:text-red-600 hover:bg-red-50 group ${isDesktopCollapsed ? 'lg:justify-center' : ''}`}
                 title="Sign Out of your account"
             >
-                <LogOut size={16} />
-                <span className={`text-xs font-medium whitespace-nowrap ${isCollapsed ? 'hidden' : 'block'}`}>Sign Out</span>
+                <LogOut size={18} strokeWidth={1.5} />
+                <span className={`text-xs font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${isDesktopCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>Sign Out</span>
             </button>
           </div>
-        </div>
-      </div>
+      </aside>
     </>
   );
 };
